@@ -1,0 +1,504 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Dumbbell,
+  Flame,
+  Award,
+  Users,
+  Clock,
+  CheckCircle2,
+  Phone,
+  Mail,
+  MapPin,
+  ChevronRight,
+  ChevronDown,
+  Star,
+  Play,
+  X,
+  Menu,
+  MessageCircle,
+  Calendar,
+  ShieldCheck,
+  TrendingUp,
+  Activity,
+  ArrowRight,
+  Search,
+  Filter,
+  Check,
+  Zap,
+  Heart,
+  Sliders,
+  DollarSign,
+  Send,
+  Eye,
+  Settings,
+  UserCheck,
+  FileText,
+  PlusCircle,
+  Trash2,
+  Edit3
+} from 'lucide-react';
+
+// ============================================================================
+// 1. GLOBAL SYSTEM CONFIGURATION & PLACEHOLDER DATA
+// ============================================================================
+export const GYM_CONFIG = {
+  brandName: "PULSE APEX",
+  tagline: "STRONGER • FITTER • HEALTHIER",
+  phone: "+91 98765 43210",
+  whatsapp: "+919876543210",
+  email: "contact@pulseapexgym.demo",
+  address: "123 Apex Boulevard, Downtown Metro, NY 10001",
+  workingHours: "Mon - Sat: 5:00 AM - 11:00 PM | Sunday: 6:00 AM - 9:00 PM",
+  currency: "₹",
+};
+
+// High-quality athletic photography assets matching the dark cinematic reference design
+const IMAGES = {
+  heroAthlete: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1200&q=80",
+  heroAthleteBack: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=1200&q=80",
+  gymInterior1: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1000&q=80",
+  gymInterior2: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1000&q=80",
+  barbellGuy: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
+  strengthArea: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=800&q=80",
+  cardioZone: "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=800&q=80",
+  functionalArea: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80",
+  freeWeights: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80",
+  trainers: {
+    alex: "https://images.unsplash.com/photo-1567013127542-490d757e51fc?auto=format&fit=crop&w=600&q=80",
+    priya: "https://images.unsplash.com/photo-1594381898411-846e7d193883?auto=format&fit=crop&w=600&q=80",
+    rahul: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+    sneha: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80",
+    arjun: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
+  }
+};
+
+interface Trainer {
+  id: string;
+  name: string;
+  role: string;
+  specialization: string;
+  exp: string;
+  image: string;
+  bio: string;
+  certifications: string[];
+}
+
+const TRAINERS_DATA: Trainer[] = [
+  {
+    id: "t1",
+    name: "Alex Carter",
+    role: "Head Strength Coach",
+    specialization: "Olympic Lifting & Hypertrophy",
+    exp: "9+ Years Experience",
+    image: IMAGES.trainers.alex,
+    bio: "Former national powerlifter dedicated to functional biomechanics, elite sports conditioning, and muscular longevity.",
+    certifications: ["CSCS Certified", "NASM Master Trainer", "CrossFit L3"]
+  },
+  {
+    id: "t2",
+    name: "Priya Sharma",
+    role: "Elite Female Fitness Coach",
+    specialization: "HIIT, Core Conditioning & Mobility",
+    exp: "7+ Years Experience",
+    image: IMAGES.trainers.priya,
+    bio: "Specializes in transformative physique sculpting, functional athletic agility, and metabolic fat burn regimes.",
+    certifications: ["ACE Certified PT", "Pre/Post Natal Specialist", "FMS Level 2"]
+  },
+  {
+    id: "t3",
+    name: "Rahul Mehta",
+    role: "Performance & Nutrition Lead",
+    specialization: "Body Recomposition & Dietetics",
+    exp: "8+ Years Experience",
+    image: IMAGES.trainers.rahul,
+    bio: "Combines strict scientific macro calculations with progressive overload protocols to build lean, powerful physiques.",
+    certifications: ["ISSN Sports Nutritionist", "ISSA Elite Coach", "Kettlebell Specialist"]
+  },
+  {
+    id: "t4",
+    name: "Sneha Roy",
+    role: "Flexibility & Posture Coach",
+    specialization: "Ashtanga Flow & Functional Core",
+    exp: "6+ Years Experience",
+    image: IMAGES.trainers.sneha,
+    bio: "Helps lifters unlock hip mobility, spinal integrity, breathing endurance, and joint recovery after heavy lifting.",
+    certifications: ["RYT 500 Yoga Alliance", "Functional Range Conditioning (FRC)"]
+  },
+  {
+    id: "t5",
+    name: "Arjun Das",
+    role: "Cardio & Calisthenics Master",
+    specialization: "Metabolic Conditioning & Agility",
+    exp: "5+ Years Experience",
+    image: IMAGES.trainers.arjun,
+    bio: "High-voltage instructor focused on explosive speed, endurance stamina, and athletic bodyweight mastery.",
+    certifications: ["TRX Senior Instructor", "USA Weightlifting L1"]
+  }
+];
+
+interface ProgramItem {
+  id: string;
+  title: string;
+  category: string;
+  level: string;
+  duration: string;
+  calories: string;
+  desc: string;
+  iconName: string;
+  image: string;
+  benefits: string[];
+}
+
+const PROGRAMS_DATA: ProgramItem[] = [
+  {
+    id: "p1",
+    title: "Strength & Powerlifting",
+    category: "Strength",
+    level: "All Levels",
+    duration: "60 mins",
+    calories: "500 - 750 kcal",
+    desc: "Master compound movements: Deadlifts, Squats, and Bench presses with laser-accurate biomechanical coaching.",
+    iconName: "Dumbbell",
+    image: IMAGES.strengthArea,
+    benefits: ["Explosive force generation", "Bone mineral density support", "Compound lift technique mastery"]
+  },
+  {
+    id: "p2",
+    title: "HIIT & Metabolic Torch",
+    category: "Cardio",
+    level: "Intermediate",
+    duration: "45 mins",
+    calories: "600 - 900 kcal",
+    desc: "High-intensity metabolic intervals designed to maximize post-exercise oxygen consumption (EPOC) for 24 hours.",
+    iconName: "Flame",
+    image: IMAGES.cardioZone,
+    benefits: ["Rapid cardiovascular adaptation", "Maximum caloric burn", "Athletic endurance"]
+  },
+  {
+    id: "p3",
+    title: "Hypertrophy & Muscle Building",
+    category: "Hypertrophy",
+    level: "Intermediate to Advanced",
+    duration: "75 mins",
+    calories: "450 - 650 kcal",
+    desc: "Targeted volume, tempo execution, and mechanical tension routines tailored for symmetrical muscular growth.",
+    iconName: "Zap",
+    image: IMAGES.barbellGuy,
+    benefits: ["Targeted muscle development", "Scientific progressive overload", "Vascularity & symmetry"]
+  },
+  {
+    id: "p4",
+    title: "Functional & Cross Conditioning",
+    category: "Functional",
+    level: "All Levels",
+    duration: "55 mins",
+    calories: "550 - 800 kcal",
+    desc: "Battle ropes, kettlebell snatches, plyometrics, and sled pushes for true combat-ready human movement.",
+    iconName: "Activity",
+    image: IMAGES.functionalArea,
+    benefits: ["Multidirectional core resilience", "Rotational power", "Injury prevention"]
+  },
+  {
+    id: "p5",
+    title: "Mobility, Yoga & Active Recovery",
+    category: "Flexibility",
+    level: "Beginner Friendly",
+    duration: "50 mins",
+    calories: "250 - 350 kcal",
+    desc: "Dynamic decompression, tissue release, and somatic stretches to prevent injury and unlock fluid movement.",
+    iconName: "Heart",
+    image: IMAGES.freeWeights,
+    benefits: ["Joint synovial lubrication", "Stress & cortisol reduction", "Enhanced lifting range"]
+  }
+];
+
+interface ScheduleSlot {
+  time: string;
+  mon: string;
+  tue: string;
+  wed: string;
+  thu: string;
+  fri: string;
+  sat: string;
+  sun: string;
+}
+
+const SCHEDULE_DATA: ScheduleSlot[] = [
+  { time: "06:00 AM - 07:00 AM", mon: "Strength", tue: "HIIT Torch", wed: "Strength", thu: "HIIT Torch", fri: "Strength", sat: "Cardio Blitz", sun: "Rest & Recovery" },
+  { time: "08:00 AM - 09:00 AM", mon: "CrossFit Power", tue: "Functional", wed: "CrossFit Power", thu: "Functional", fri: "Full Body", sat: "Yoga Flow", sun: "Mobility Lab" },
+  { time: "05:00 PM - 06:00 PM", mon: "Yoga Flow", tue: "Power Lifting", wed: "Cardio Blitz", thu: "Power Lifting", fri: "Yoga Flow", sat: "HIIT Torch", sun: "Open Floor" },
+  { time: "07:00 PM - 08:00 PM", mon: "Zumba & Core", tue: "Cardio Blast", wed: "Zumba & Core", thu: "Cardio Blast", fri: "Hypertrophy", sat: "Strength Peak", sun: "Rest" }
+];
+
+interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  quote: string;
+  rating: number;
+  metric: string;
+}
+
+const TESTIMONIALS_DATA: Testimonial[] = [
+  {
+    id: "1",
+    name: "Vikram Singhania",
+    role: "Software Architect",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
+    quote: "Pulse Apex transformed not just my physique but my daily productivity. The coaches correct every single rep with laser precision.",
+    rating: 5,
+    metric: "-14kg Fat Lost / +6kg Lean Muscle"
+  },
+  {
+    id: "2",
+    name: "Ananya Deshmukh",
+    role: "Marathon Runner & Entrepreneur",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
+    quote: "The facility hygiene, the calibrated Olympic plates, and the supportive atmosphere are unmatched anywhere in the city.",
+    rating: 5,
+    metric: "Sub-4 Hour Marathon Achieved"
+  },
+  {
+    id: "3",
+    name: "Marcus Vance",
+    role: "Corporate Executive",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80",
+    quote: "The Pro tier with dedicated dietary guidance took the guesswork out of my busy life. Down 8% body fat in 12 weeks flat.",
+    rating: 5,
+    metric: "8% Body Fat Reduction"
+  }
+];
+
+// ============================================================================
+// 2. MAIN APPLICATION COMPONENT
+// ============================================================================
+export default function AdvancedGymApp() {
+  // Navigation & Page State
+  const [currentPage, setCurrentPage] = useState<
+    'home' | 'about' | 'programs' | 'trainers' | 'membership' | 'facilities' | 'schedule' | 'reviews' | 'contact' | 'admin'
+  >('home');
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'quarterly' | 'annual'>('monthly');
+
+  // Modals state
+  const [showTrialModal, setShowTrialModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Gallery filter state
+  const [galleryCategory, setGalleryCategory] = useState<string>('all');
+
+  // Admin prototype dynamic state
+  const [enquiries, setEnquiries] = useState([
+    { id: "ENQ-101", name: "Rohan Patel", email: "rohan@gmail.com", phone: "+91 99887 11223", plan: "Pro Plan (₹1,499)", status: "Pending", date: "Today, 10:24 AM" },
+    { id: "ENQ-102", name: "Meera Nair", email: "meera.n@yahoo.com", phone: "+91 98765 00987", plan: "Trial Session", status: "Contacted", date: "Yesterday, 4:15 PM" },
+    { id: "ENQ-103", name: "Kunal Sen", email: "kunal@corporate.in", phone: "+91 91234 56789", plan: "Premium VIP (₹1,999)", status: "Enrolled", date: "Nov 06, 2:00 PM" }
+  ]);
+
+  // Form states
+  const [trialFormData, setTrialFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    goal: "Fat Loss & Conditioning",
+    preferredSlot: "Morning (06:00 AM - 09:00 AM)"
+  });
+
+  const [contactFormData, setContactFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "Membership Information",
+    message: ""
+  });
+
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+
+  // Helpers
+  const showNotification = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4000);
+  };
+
+  const handlePageChange = (page: typeof currentPage) => {
+    setCurrentPage(page);
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleTrialSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!trialFormData.name || !trialFormData.phone) {
+      showNotification("Please provide your name and phone number.");
+      return;
+    }
+    const newEnq = {
+      id: `ENQ-${Math.floor(100 + Math.random() * 900)}`,
+      name: trialFormData.name,
+      email: trialFormData.email || "demo@attendee.com",
+      phone: trialFormData.phone,
+      plan: `Free Pass: ${trialFormData.goal}`,
+      status: "Pending",
+      date: "Just now"
+    };
+    setEnquiries([newEnq, ...enquiries]);
+    setShowTrialModal(false);
+    showNotification("Success! Your VIP Pass is booked. A trainer will call to confirm your time.");
+    setTrialFormData({ name: "", phone: "", email: "", goal: "Fat Loss & Conditioning", preferredSlot: "Morning (06:00 AM - 09:00 AM)" });
+  };
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contactFormData.name || !contactFormData.email || !contactFormData.message) {
+      showNotification("Please complete all required fields.");
+      return;
+    }
+    const newEnq = {
+      id: `ENQ-${Math.floor(100 + Math.random() * 900)}`,
+      name: contactFormData.name,
+      email: contactFormData.email,
+      phone: contactFormData.phone || "+91 Contact Request",
+      plan: `Inquiry: ${contactFormData.subject}`,
+      status: "Pending",
+      date: "Just now"
+    };
+    setEnquiries([newEnq, ...enquiries]);
+    showNotification("Thank you! Message received. Our front desk will respond shortly.");
+    setContactFormData({ name: "", email: "", phone: "", subject: "Membership Information", message: "" });
+  };
+
+  const handleWhatsAppDirect = (msg?: string) => {
+    const text = encodeURIComponent(msg || "Hello Pulse Apex Gym! I want to enquire about membership plans and booking a free session.");
+    window.open(`https://wa.me/${GYM_CONFIG.whatsapp.replace(/[^0-9]/g, '')}?text=${text}`, '_blank');
+  };
+
+  // Pricing calculations
+  const getPlanPrice = (baseMonthly: number) => {
+    if (billingPeriod === 'monthly') return `${GYM_CONFIG.currency}${baseMonthly.toLocaleString('en-IN')}`;
+    if (billingPeriod === 'quarterly') {
+      const discounted = Math.round(baseMonthly * 3 * 0.88); // 12% discount
+      return `${GYM_CONFIG.currency}${discounted.toLocaleString('en-IN')}`;
+    }
+    // annual
+    const annualDiscounted = Math.round(baseMonthly * 12 * 0.75); // 25% discount
+    return `${GYM_CONFIG.currency}${annualDiscounted.toLocaleString('en-IN')}`;
+  };
+
+  const getBillingSuffix = () => {
+    if (billingPeriod === 'monthly') return '/ month';
+    if (billingPeriod === 'quarterly') return '/ quarter (Save 12%)';
+    return '/ year (Save 25%)';
+  };
+
+  return (
+    <div className="min-h-screen bg-[#080808] text-white font-sans antialiased selection:bg-[#FF303B] selection:text-white">
+      {/* Toast Notification Banner */}
+      {toastMessage && (
+        <div className="fixed top-20 right-5 z-50 bg-[#141414] border-l-4 border-[#FF303B] text-white px-5 py-3 rounded-md shadow-2xl flex items-center space-x-3 transition-all animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-[#FF303B] flex-shrink-0" />
+          <span className="text-sm font-medium">{toastMessage}</span>
+          <button onClick={() => setToastMessage(null)} className="text-gray-400 hover:text-white ml-2">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* TOP HEADER & NAVIGATION (Reference Style: Dark with red brand accent) */}
+      <header className="sticky top-0 z-40 bg-[#080808]/95 backdrop-blur-md border-b border-[#1E1E1E]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          {/* Brand Logo */}
+          <div 
+            onClick={() => handlePageChange('home')}
+            className="flex items-center space-x-3 cursor-pointer group"
+          >
+            <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-[#FF303B] to-[#990d14] flex items-center justify-center shadow-lg shadow-[#FF303B]/20 group-hover:scale-105 transition-transform">
+              <Dumbbell className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <span className="text-xl font-extrabold tracking-tight text-white block leading-none">
+                {GYM_CONFIG.brandName}
+              </span>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-[#FF303B]">
+                Elite Fitness Club
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center space-x-7 text-sm font-semibold text-gray-300">
+            <button
+              onClick={() => handlePageChange('home')}
+              className={`hover:text-white transition-colors relative py-1 ${
+                currentPage === 'home' ? 'text-white font-bold' : ''
+              }`}
+            >
+              Home
+              {currentPage === 'home' && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FF303B] rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => handlePageChange('about')}
+              className={`hover:text-white transition-colors relative py-1 ${
+                currentPage === 'about' ? 'text-white font-bold' : ''
+              }`}
+            >
+              About
+              {currentPage === 'about' && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FF303B] rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => handlePageChange('programs')}
+              className={`hover:text-white transition-colors relative py-1 ${
+                currentPage === 'programs' ? 'text-white font-bold' : ''
+              }`}
+            >
+              Programs
+              {currentPage === 'programs' && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FF303B] rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => handlePageChange('membership')}
+              className={`hover:text-white transition-colors relative py-1 ${
+                currentPage === 'membership' ? 'text-white font-bold' : ''
+              }`}
+            >
+              Membership
+              {currentPage === 'membership' && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FF303B] rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => handlePageChange('trainers')}
+              className={`hover:text-white transition-colors relative py-1 ${
+                currentPage === 'trainers' ? 'text-white font-bold' : ''
+              }`}
+            >
+              Trainers
+              {currentPage === 'trainers' && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FF303B] rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => handlePageChange('facilities')}
+              className={`hover:text-white transition-colors relative py-1 ${
+                currentPage === 'facilities' ? 'text-white font-bold' : ''
+              }`}
+            >
+              Gallery
+              {currentPage === 'facilities' && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FF303B] rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => handlePageChange('schedule')}
+              className={`hover:text-white transition-colors relative py-1 ${
+                currentPage === 'schedule' ? 'text-wh
